@@ -1,0 +1,43 @@
+# Build artifacts
+*.o
+*.obj
+*.a
+*.lib
+*.so
+*.dylib
+*.dll
+*.exe
+*.out
+
+# Godot build
+bin/
+godot/
+*.godot
+
+# Editor
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.code-workspace
+*.sublime-project
+*.sublime-workspace
+
+# Compiled Python
+__pycache__/
+*.pyc
+
+# Godot-specific
+*.import
+*.translation
+export_presets.cfg
+
+# Module build
+*.os
+*.bc
+platform/

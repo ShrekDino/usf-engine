@@ -1,0 +1,25 @@
+#!/usr/bin/env python
+
+Import("env")
+
+env.add_source_files(env.modules_sources, [
+    "register_types.cpp",
+    "usf_world.cpp",
+    "core/usf_constants.cpp",
+    "core/simplex.cpp",
+    "core/simplicial_complex.cpp",
+    "core/dynamic_coherence.cpp",
+    "core/lee_wick.cpp",
+    "core/regge_tensor.cpp",
+    "physics/tetrad.cpp",
+    "physics/torsion_field.cpp",
+    "physics/pec_solver.cpp",
+    "physics/bounce_solver.cpp",
+    "physics/soliton.cpp",
+    "physics/membrane.cpp",
+    "physics/forman_ricci.cpp",
+    "thermo/szilard_engine.cpp",
+    "thermo/generative_model.cpp",
+    "thermo/markov_blanket.cpp",
+    "dqfr/dqfr_controller.cpp",
+])
