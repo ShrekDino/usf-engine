@@ -1,4 +1,6 @@
 #include "register_types.h"
+#include "modules/register_module_types.h"
+#include "core/object/class_db.h"
 #include "core/usf_constants.h"
 #include "core/simplicial_complex.h"
 #include "core/dynamic_coherence.h"
@@ -17,7 +19,10 @@
 #include "dqfr/dqfr_controller.h"
 #include "usf_world.h"
 
-void initialize_usf_engine_module() {
+void initialize_usf_engine_module(ModuleInitializationLevel p_level) {
+    if (p_level != MODULE_INITIALIZATION_LEVEL_SCENE) {
+        return;
+    }
     GDREGISTER_CLASS(USFConstants);
     GDREGISTER_CLASS(SimplicialComplex);
     GDREGISTER_CLASS(DynamicCoherence);
@@ -37,5 +42,8 @@ void initialize_usf_engine_module() {
     GDREGISTER_CLASS(USFWorld);
 }
 
-void uninitialize_usf_engine_module() {
+void uninitialize_usf_engine_module(ModuleInitializationLevel p_level) {
+    if (p_level != MODULE_INITIALIZATION_LEVEL_SCENE) {
+        return;
+    }
 }

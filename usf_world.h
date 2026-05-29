@@ -49,8 +49,8 @@ public:
     void initialize_world();
     void clear_world();
 
-    void _ready() override;
-    void _process(double delta) override;
+    void _ready();
+    void _process(double delta);
 
     double get_variational_free_energy() const { return variational_free_energy; }
     double get_dqfr_ratio() const { return dqfr_ratio; }

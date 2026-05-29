@@ -20,11 +20,11 @@ public:
     Simplex();
     Simplex(Dimension p_dim, const Vector<int> &p_verts);
 
-    static Simplex vertex(int v);
-    static Simplex edge(int a, int b);
-    static Simplex triangle(int a, int b, int c);
-    static Simplex tetrahedron(int a, int b, int c, int d);
-    static Simplex four_simplex(int a, int b, int c, int d, int e);
+    static Simplex make_vertex(int v);
+    static Simplex make_edge(int a, int b);
+    static Simplex make_triangle(int a, int b, int c);
+    static Simplex make_tetrahedron(int a, int b, int c, int d);
+    static Simplex make_four_simplex(int a, int b, int c, int d, int e);
 
     int dimension() const;
     int size() const;

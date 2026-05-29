@@ -1,4 +1,4 @@
-#include "thermo/szilard_engine.h"
+#include "szilard_engine.h"
 #include "core/math/math_funcs.h"
 #include <cmath>
 
@@ -30,7 +30,7 @@ double SzilardEngine::extract_work(double bits) {
         return 0.0;
     }
     double k_b = constants->k_b;
-    double work = k_b * temperature * M_LN2 * bits * efficiency;
+    double work = k_b * temperature * Math::LN2 * bits * efficiency;
     negentropy -= bits;
     waste_heat += work * (1.0 - efficiency);
     bits_processed += (int)bits;
@@ -56,7 +56,7 @@ bool SzilardEngine::is_alive() const {
 }
 
 double SzilardEngine::landauer_cost(double bits) const {
-    return constants->k_b * temperature * M_LN2 * bits;
+    return constants->k_b * temperature * Math::LN2 * bits;
 }
 
 double SzilardEngine::metabolic_rate() const {
@@ -67,7 +67,7 @@ double SzilardEngine::metabolic_rate() const {
 }
 
 double SzilardEngine::max_work_possible() const {
-    return negentropy * constants->k_b * temperature * M_LN2 * efficiency;
+    return negentropy * constants->k_b * temperature * Math::LN2 * efficiency;
 }
 
 void SzilardEngine::step(double dt) {

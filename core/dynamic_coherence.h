@@ -4,7 +4,7 @@
 #include "core/io/resource.h"
 #include "core/object/class_db.h"
 #include "core/templates/vector.h"
-#include "core/simplicial_complex.h"
+#include "simplicial_complex.h"
 
 class DynamicCoherence : public Resource {
     GDCLASS(DynamicCoherence, Resource);

@@ -1,4 +1,5 @@
-#include "physics/bounce_solver.h"
+#include "core/math/math_defs.h"
+#include "bounce_solver.h"
 #include "core/math/math_funcs.h"
 #include <cmath>
 
@@ -20,11 +21,10 @@ void BounceSolver::initialize(double init_scale, double init_density, double ini
     a_min = init_scale;
     time_of_bounce = 0.0;
 
-    double c = constants->c;
     double g = constants->g;
     double kappa = constants->kappa;
 
-    double h_sq = 8.0 * Math_PI * g * rho_matter / 3.0
+    double h_sq = 8.0 * Math::PI * g * rho_matter / 3.0
                   + 3.0 * kappa * kappa * torsion_s2
                   - k_curvature / (a * a);
     h = h_sq > 0.0 ? std::sqrt(h_sq) : 0.0;
@@ -47,7 +47,7 @@ void BounceSolver::step(double dt) {
     double total_rho = rho_m + rho_torsion;
     double total_p = p_m + p_torsion;
 
-    double a_ddot = -(4.0 * Math_PI * g / (3.0 * c * c))
+    double a_ddot = -(4.0 * Math::PI * g / (3.0 * c * c))
                     * (total_rho + 3.0 * total_p / (c * c))
                     * a_current;
 
@@ -73,7 +73,7 @@ void BounceSolver::step(double dt) {
     torsion_s2 = torsion_s2_new;
 
     if (!bounce_detected && h < 0.01 && a_new < a_min * 1.01) {
-        double h_sq = 8.0 * Math_PI * g * rho_m_new / 3.0
+        double h_sq = 8.0 * Math::PI * g * rho_m_new / 3.0
                       + 3.0 * kappa * kappa * torsion_s2_new
                       - k_curvature / (a_new * a_new);
         double h_min = h_sq > 0.0 ? std::sqrt(h_sq) : 0.0;
@@ -89,7 +89,7 @@ void BounceSolver::step(double dt) {
         a_min = a_new;
     }
 
-    double h_sq = 8.0 * Math_PI * g * rho_m_new / 3.0
+    double h_sq = 8.0 * Math::PI * g * rho_m_new / 3.0
                   + 3.0 * kappa * kappa * torsion_s2_new
                   - k_curvature / (a_new * a_new);
     h = h_sq > 0.0 ? std::sqrt(h_sq) : 0.0;
@@ -107,13 +107,13 @@ void BounceSolver::integrate(int steps, double dt) {
 }
 
 double BounceSolver::hubble_squared() const {
-    return 8.0 * Math_PI * constants->g * rho_matter / 3.0
+    return 8.0 * Math::PI * constants->g * rho_matter / 3.0
            + 3.0 * constants->kappa * constants->kappa * torsion_s2
            - k_curvature / (a * a);
 }
 
 bool BounceSolver::torsion_dominated() const {
-    double g_term = 8.0 * Math_PI * constants->g * rho_matter / 3.0;
+    double g_term = 8.0 * Math::PI * constants->g * rho_matter / 3.0;
     double t_term = 3.0 * constants->kappa * constants->kappa * torsion_s2;
     return t_term > g_term;
 }
@@ -121,7 +121,7 @@ bool BounceSolver::torsion_dominated() const {
 double BounceSolver::raychaudhuri_term() const {
     double kappa = constants->kappa;
     double total_rho = rho_matter + (1.5 * kappa * kappa * torsion_s2);
-    return -(4.0 * Math_PI * constants->g / (3.0 * constants->c * constants->c))
+    return -(4.0 * Math::PI * constants->g / (3.0 * constants->c * constants->c))
            * (total_rho + 3.0 * total_rho / (constants->c * constants->c));
 }
 

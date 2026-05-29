@@ -3,7 +3,7 @@
 
 #include "scene/main/node.h"
 #include "core/object/class_db.h"
-#include "core/usf_constants.h"
+#include "../core/usf_constants.h"
 
 class BounceSolver : public Node {
     GDCLASS(BounceSolver, Node);

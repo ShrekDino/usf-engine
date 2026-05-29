@@ -4,8 +4,8 @@
 #include "core/io/resource.h"
 #include "core/object/class_db.h"
 #include "core/templates/vector.h"
-#include "physics/tetrad.h"
-#include "core/usf_constants.h"
+#include "tetrad.h"
+#include "../core/usf_constants.h"
 
 class TorsionField : public Resource {
     GDCLASS(TorsionField, Resource);

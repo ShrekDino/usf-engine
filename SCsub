@@ -1,8 +1,13 @@
 #!/usr/bin/env python
+from misc.utility.scons_hints import *
 
 Import("env")
+Import("env_modules")
 
-env.add_source_files(env.modules_sources, [
+env_usf = env_modules.Clone()
+env_usf.Prepend(CPPPATH=[env_usf.Dir(".").path])
+
+env_usf.add_source_files(env.modules_sources, [
     "register_types.cpp",
     "usf_world.cpp",
     "core/usf_constants.cpp",

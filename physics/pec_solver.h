@@ -4,11 +4,11 @@
 #include "scene/main/node.h"
 #include "core/object/class_db.h"
 #include "core/templates/vector.h"
-#include "core/simplicial_complex.h"
-#include "core/regge_tensor.h"
-#include "core/usf_constants.h"
-#include "physics/tetrad.h"
-#include "physics/torsion_field.h"
+#include "../core/simplicial_complex.h"
+#include "../core/regge_tensor.h"
+#include "../core/usf_constants.h"
+#include "tetrad.h"
+#include "torsion_field.h"
 
 class PECSolver : public Node {
     GDCLASS(PECSolver, Node);

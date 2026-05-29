@@ -1,4 +1,7 @@
-#include "dqfr/dqfr_controller.h"
+#include "core/math/math_defs.h"
+#include "../core/lee_wick.h"
+#include "core/object/class_db.h"
+#include "dqfr_controller.h"
 #include "core/math/math_funcs.h"
 #include <cmath>
 
@@ -49,7 +52,7 @@ void DQFRController::set_sample_duration(double d) {
 double DQFRController::blanket_permeability(double t, double tau) const {
     if (t <= 0.0) return 0.0;
     if (t >= tau) return 1.0;
-    return 0.5 * (1.0 - std::cos(Math_PI * t / tau));
+    return 0.5 * (1.0 - std::cos(Math::PI * t / tau));
 }
 
 double DQFRController::lapse_rate(double g_00) const {
@@ -86,7 +89,6 @@ void DQFRController::_process(double delta) {
     }
 
     double scaled_delta = delta * lapse;
-    double lw = constants->planck_length;
 
     switch (current_phase) {
         case PHASE_DRIFT: {
@@ -216,3 +218,4 @@ void DQFRController::_bind_methods() {
     BIND_ENUM_CONSTANT(PHASE_DRIFT);
     BIND_ENUM_CONSTANT(PHASE_SAMPLE);
 }
+VARIANT_ENUM_CAST(DQFRController::Phase);

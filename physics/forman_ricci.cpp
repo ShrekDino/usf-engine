@@ -1,4 +1,4 @@
-#include "physics/forman_ricci.h"
+#include "forman_ricci.h"
 #include "core/math/math_funcs.h"
 #include <cmath>
 
@@ -47,7 +47,7 @@ Vector<double> FormanRicci::compute_edge_curvatures(Ref<SimplicialComplex> compl
     curvatures.resize(n_edges);
 
     for (int i = 0; i < n_edges; i++) {
-        curvatures.set(i, compute_ricci_for_edge(*complex, i));
+        curvatures.set(i, compute_ricci_for_edge(*complex.ptr(), i));
     }
 
     return curvatures;
@@ -119,7 +119,7 @@ void FormanRicci::damp_metric(Ref<SimplicialComplex> complex, double dt) {
     double lw = planck_floor;
 
     for (int ei = 0; ei < complex->edge_count(); ei++) {
-        double ricci = compute_ricci_for_edge(*complex, ei);
+        double ricci = compute_ricci_for_edge(*complex.ptr(), ei);
         double current_len = complex->edge_lengths[ei];
         double abs_len = std::abs(current_len);
 

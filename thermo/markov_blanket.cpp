@@ -1,4 +1,5 @@
-#include "thermo/markov_blanket.h"
+#include "core/math/math_defs.h"
+#include "markov_blanket.h"
 #include "core/math/math_funcs.h"
 #include <cmath>
 
@@ -112,7 +113,7 @@ double MarkovBlanket::entropy() const {
     variance /= (double)internal_states.size();
 
     if (variance > 0.0) {
-        return 0.5 * std::log(2.0 * Math_PI * M_E * variance);
+        return 0.5 * std::log(2.0 * Math::PI * Math::E * variance);
     }
     return 0.0;
 }

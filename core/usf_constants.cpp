@@ -1,6 +1,6 @@
-#include "core/usf_constants.h"
-#include "core/math/math_funcs.h"
 #include "core/math/math_defs.h"
+#include "usf_constants.h"
+#include "core/math/math_funcs.h"
 
 USFConstants::USFConstants() {
     recompute();
@@ -64,7 +64,7 @@ double USFConstants::planck_mass_from(double p_c, double p_g, double p_h) {
 }
 
 double USFConstants::kappa_from(double p_g) {
-    return Math::sqrt(8.0 * Math_PI * p_g);
+    return Math::sqrt(8.0 * Math::PI * p_g);
 }
 
 void USFConstants::_bind_methods() {

@@ -1,4 +1,4 @@
-#include "core/dynamic_coherence.h"
+#include "dynamic_coherence.h"
 #include "core/math/math_funcs.h"
 
 DynamicCoherence::DynamicCoherence() {

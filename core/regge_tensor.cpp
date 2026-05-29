@@ -1,4 +1,5 @@
-#include "core/regge_tensor.h"
+#include "core/math/math_defs.h"
+#include "regge_tensor.h"
 #include "core/math/math_funcs.h"
 #include <cmath>
 
@@ -6,7 +7,6 @@ ReggeTensor::ReggeTensor() :
         regge_action(0.0) {}
 
 void ReggeTensor::compute(Ref<SimplicialComplex> complex) {
-    double lw = complex->constants->planck_length;
     int n_tri = complex->triangle_count();
     deficit_angles.resize(n_tri);
     hinge_volumes.resize(n_tri);
@@ -66,7 +66,7 @@ void ReggeTensor::compute(Ref<SimplicialComplex> complex) {
             }
 
             if (d >= 0) {
-                double theta = dihedral_angle_4d(*complex, a, b, c, d);
+                double theta = dihedral_angle_4d(*complex.ptr(), a, b, c, d);
                 total_dihedral += theta;
                 tetra_count++;
             }
@@ -74,7 +74,7 @@ void ReggeTensor::compute(Ref<SimplicialComplex> complex) {
 
         double deficit = 0.0;
         if (tetra_count > 0) {
-            deficit = 2.0 * Math_PI - total_dihedral;
+            deficit = 2.0 * Math::PI - total_dihedral;
             if (deficit < 0.0) {
                 deficit = 0.0;
             }
@@ -84,7 +84,7 @@ void ReggeTensor::compute(Ref<SimplicialComplex> complex) {
     }
 
     regge_action = 0.0;
-    double prefactor = 1.0 / (16.0 * Math_PI * complex->constants->g);
+    double prefactor = 1.0 / (16.0 * Math::PI * complex->constants->g);
     for (int i = 0; i < n_tri; i++) {
         regge_action += prefactor * hinge_volumes[i] * deficit_angles[i];
     }
@@ -130,7 +130,7 @@ double ReggeTensor::dihedral_angle_4d(const SimplicialComplex &complex, int a, i
     double cross = ac_ad - ab_ac * ab_ad / (ab_sq);
 
     if (ab_perp_ac <= 0.0 || ab_perp_ad <= 0.0) {
-        return Math_PI / 3.0;
+        return Math::PI / 3.0;
     }
 
     double cos_theta = cross / (std::sqrt(ab_perp_ac) * std::sqrt(ab_perp_ad));
@@ -202,7 +202,7 @@ double ReggeTensor::scalar_curvature_at(int hinge_idx) const {
 double ReggeTensor::average_curvature() const {
     double total_v = total_hinge_volume();
     if (total_v > 0.0) {
-        return regge_action * 16.0 * Math_PI * 2.0 / total_v;
+        return regge_action * 16.0 * Math::PI * 2.0 / total_v;
     }
     return 0.0;
 }

@@ -1,4 +1,4 @@
-#include "core/simplicial_complex.h"
+#include "simplicial_complex.h"
 #include "core/math/math_funcs.h"
 #include <set>
 
@@ -120,14 +120,14 @@ void SimplicialComplex::triangulate_hypercubic(int n) {
 
                     for (int a = 0; a < 16; a++) {
                         for (int b = a + 1; b < 16; b++) {
-                            edge_set.insert(Simplex::edge(verts[a], verts[b]));
+                            edge_set.insert(Simplex::make_edge(verts[a], verts[b]));
                         }
                     }
 
                     for (int a = 0; a < 16; a++) {
                         for (int b = a + 1; b < 16; b++) {
                             for (int c = b + 1; c < 16; c++) {
-                                tri_set.insert(Simplex::triangle(verts[a], verts[b], verts[c]));
+                                tri_set.insert(Simplex::make_triangle(verts[a], verts[b], verts[c]));
                             }
                         }
                     }
@@ -136,18 +136,18 @@ void SimplicialComplex::triangulate_hypercubic(int n) {
                         for (int b = a + 1; b < 16; b++) {
                             for (int c = b + 1; c < 16; c++) {
                                 for (int d = c + 1; d < 16; d++) {
-                                    tet_set.insert(Simplex::tetrahedron(verts[a], verts[b], verts[c], verts[d]));
+                                    tet_set.insert(Simplex::make_tetrahedron(verts[a], verts[b], verts[c], verts[d]));
                                 }
                             }
                         }
                     }
 
-                    four_simplices.push_back(Simplex::four_simplex(v, vx, vxy, vxyz, vxyzt));
-                    four_simplices.push_back(Simplex::four_simplex(v, vy, vxy, vxyz, vxyzt));
-                    four_simplices.push_back(Simplex::four_simplex(v, vx, vxz, vxyz, vxyzt));
-                    four_simplices.push_back(Simplex::four_simplex(v, vz, vxz, vxyz, vxyzt));
-                    four_simplices.push_back(Simplex::four_simplex(v, vy, vyz, vxyz, vxyzt));
-                    four_simplices.push_back(Simplex::four_simplex(v, vz, vyz, vxyz, vxyzt));
+                    four_simplices.push_back(Simplex::make_four_simplex(v, vx, vxy, vxyz, vxyzt));
+                    four_simplices.push_back(Simplex::make_four_simplex(v, vy, vxy, vxyz, vxyzt));
+                    four_simplices.push_back(Simplex::make_four_simplex(v, vx, vxz, vxyz, vxyzt));
+                    four_simplices.push_back(Simplex::make_four_simplex(v, vz, vxz, vxyz, vxyzt));
+                    four_simplices.push_back(Simplex::make_four_simplex(v, vy, vyz, vxyz, vxyzt));
+                    four_simplices.push_back(Simplex::make_four_simplex(v, vz, vyz, vxyz, vxyzt));
                 }
             }
         }

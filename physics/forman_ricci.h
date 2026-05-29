@@ -4,8 +4,8 @@
 #include "core/io/resource.h"
 #include "core/object/class_db.h"
 #include "core/templates/vector.h"
-#include "core/simplicial_complex.h"
-#include "core/usf_constants.h"
+#include "../core/simplicial_complex.h"
+#include "../core/usf_constants.h"
 
 class FormanRicci : public Resource {
     GDCLASS(FormanRicci, Resource);

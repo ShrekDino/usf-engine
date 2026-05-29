@@ -5,8 +5,8 @@
 #include "core/object/class_db.h"
 #include "core/templates/vector.h"
 #include "core/templates/local_vector.h"
-#include "core/simplex.h"
-#include "core/usf_constants.h"
+#include "simplex.h"
+#include "usf_constants.h"
 
 struct Vec4d {
     double x, y, z, w;

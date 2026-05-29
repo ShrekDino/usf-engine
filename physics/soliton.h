@@ -4,7 +4,7 @@
 #include "core/io/resource.h"
 #include "core/object/class_db.h"
 #include "core/templates/vector.h"
-#include "core/usf_constants.h"
+#include "../core/usf_constants.h"
 
 class Soliton : public Resource {
     GDCLASS(Soliton, Resource);

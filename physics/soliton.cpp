@@ -1,4 +1,5 @@
-#include "physics/soliton.h"
+#include "core/math/math_defs.h"
+#include "soliton.h"
 #include "core/math/math_funcs.h"
 #include <cmath>
 
@@ -14,7 +15,7 @@ void Soliton::build(double p_mass, int charge) {
     mass = p_mass;
     topological_charge = charge;
     horizon_radius = 2.0 * constants->g * mass / (constants->c * constants->c);
-    core_density = mass / ((4.0 / 3.0) * Math_PI * horizon_radius * horizon_radius * horizon_radius);
+    core_density = mass / ((4.0 / 3.0) * Math::PI * horizon_radius * horizon_radius * horizon_radius);
 
     int n_points = 100;
     pressure_profile.resize(n_points);
@@ -33,7 +34,7 @@ void Soliton::build(double p_mass, int charge) {
 }
 
 double Soliton::bps_mass() const {
-    double vol = (4.0 / 3.0) * Math_PI * horizon_radius * horizon_radius * horizon_radius;
+    double vol = (4.0 / 3.0) * Math::PI * horizon_radius * horizon_radius * horizon_radius;
     return core_density * vol;
 }
 

@@ -1,6 +1,5 @@
-#include "core/simplex.h"
+#include "simplex.h"
 #include "core/string/ustring.h"
-#include "core/string/print_string.h"
 
 Simplex::Simplex() :
         dim(VERTEX),
@@ -12,20 +11,20 @@ Simplex::Simplex(Dimension p_dim, const Vector<int> &p_verts) :
     sort_verts(verts);
 }
 
-Simplex Simplex::vertex(int v) {
+Simplex Simplex::make_vertex(int v) {
     Vector<int> vv;
     vv.push_back(v);
     return Simplex(VERTEX, vv);
 }
 
-Simplex Simplex::edge(int a, int b) {
+Simplex Simplex::make_edge(int a, int b) {
     Vector<int> vv;
     vv.push_back(a);
     vv.push_back(b);
     return Simplex(EDGE, vv);
 }
 
-Simplex Simplex::triangle(int a, int b, int c) {
+Simplex Simplex::make_triangle(int a, int b, int c) {
     Vector<int> vv;
     vv.push_back(a);
     vv.push_back(b);
@@ -33,7 +32,7 @@ Simplex Simplex::triangle(int a, int b, int c) {
     return Simplex(TRIANGLE, vv);
 }
 
-Simplex Simplex::tetrahedron(int a, int b, int c, int d) {
+Simplex Simplex::make_tetrahedron(int a, int b, int c, int d) {
     Vector<int> vv;
     vv.push_back(a);
     vv.push_back(b);
@@ -42,7 +41,7 @@ Simplex Simplex::tetrahedron(int a, int b, int c, int d) {
     return Simplex(TETRAHEDRON, vv);
 }
 
-Simplex Simplex::four_simplex(int a, int b, int c, int d, int e) {
+Simplex Simplex::make_four_simplex(int a, int b, int c, int d, int e) {
     Vector<int> vv;
     vv.push_back(a);
     vv.push_back(b);
@@ -74,29 +73,29 @@ Vector<Simplex> Simplex::boundary() const {
         case VERTEX:
             break;
         case EDGE: {
-            result.push_back(Simplex::vertex(verts[0]));
-            result.push_back(Simplex::vertex(verts[1]));
+            result.push_back(Simplex::make_vertex(verts[0]));
+            result.push_back(Simplex::make_vertex(verts[1]));
             break;
         }
         case TRIANGLE: {
-            result.push_back(Simplex::edge(verts[1], verts[2]));
-            result.push_back(Simplex::edge(verts[0], verts[2]));
-            result.push_back(Simplex::edge(verts[0], verts[1]));
+            result.push_back(Simplex::make_edge(verts[1], verts[2]));
+            result.push_back(Simplex::make_edge(verts[0], verts[2]));
+            result.push_back(Simplex::make_edge(verts[0], verts[1]));
             break;
         }
         case TETRAHEDRON: {
-            result.push_back(Simplex::triangle(verts[1], verts[2], verts[3]));
-            result.push_back(Simplex::triangle(verts[0], verts[2], verts[3]));
-            result.push_back(Simplex::triangle(verts[0], verts[1], verts[3]));
-            result.push_back(Simplex::triangle(verts[0], verts[1], verts[2]));
+            result.push_back(Simplex::make_triangle(verts[1], verts[2], verts[3]));
+            result.push_back(Simplex::make_triangle(verts[0], verts[2], verts[3]));
+            result.push_back(Simplex::make_triangle(verts[0], verts[1], verts[3]));
+            result.push_back(Simplex::make_triangle(verts[0], verts[1], verts[2]));
             break;
         }
         case FOUR_SIMPLEX: {
-            result.push_back(Simplex::tetrahedron(verts[1], verts[2], verts[3], verts[4]));
-            result.push_back(Simplex::tetrahedron(verts[0], verts[2], verts[3], verts[4]));
-            result.push_back(Simplex::tetrahedron(verts[0], verts[1], verts[3], verts[4]));
-            result.push_back(Simplex::tetrahedron(verts[0], verts[1], verts[2], verts[4]));
-            result.push_back(Simplex::tetrahedron(verts[0], verts[1], verts[2], verts[3]));
+            result.push_back(Simplex::make_tetrahedron(verts[1], verts[2], verts[3], verts[4]));
+            result.push_back(Simplex::make_tetrahedron(verts[0], verts[2], verts[3], verts[4]));
+            result.push_back(Simplex::make_tetrahedron(verts[0], verts[1], verts[3], verts[4]));
+            result.push_back(Simplex::make_tetrahedron(verts[0], verts[1], verts[2], verts[4]));
+            result.push_back(Simplex::make_tetrahedron(verts[0], verts[1], verts[2], verts[3]));
             break;
         }
     }
@@ -179,9 +178,9 @@ void Simplex::sort_verts(Vector<int> &v) {
     for (int i = 0; i < n - 1; i++) {
         for (int j = 0; j < n - i - 1; j++) {
             if (v[j] > v[j + 1]) {
-                int tmp = v[j];
-                v[j] = v[j + 1];
-                v[j + 1] = tmp;
+                int tmp = v.write[j];
+                v.write[j] = v.write[j + 1];
+                v.write[j + 1] = tmp;
             }
         }
     }

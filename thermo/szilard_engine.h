@@ -3,7 +3,7 @@
 
 #include "core/io/resource.h"
 #include "core/object/class_db.h"
-#include "core/usf_constants.h"
+#include "../core/usf_constants.h"
 
 class SzilardEngine : public Resource {
     GDCLASS(SzilardEngine, Resource);

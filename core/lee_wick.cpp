@@ -1,4 +1,4 @@
-#include "core/lee_wick.h"
+#include "lee_wick.h"
 #include "core/math/math_funcs.h"
 
 LeeWickRegulator::LeeWickRegulator() {

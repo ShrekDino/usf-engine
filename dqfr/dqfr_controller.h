@@ -1,19 +1,20 @@
+#include "core/object/class_db.h"
 #ifndef DQFR_CONTROLLER_H
 #define DQFR_CONTROLLER_H
 
 #include "scene/main/node.h"
 #include "core/object/class_db.h"
 #include "core/templates/vector.h"
-#include "core/simplicial_complex.h"
-#include "core/dynamic_coherence.h"
-#include "core/regge_tensor.h"
-#include "core/usf_constants.h"
-#include "physics/pec_solver.h"
-#include "physics/forman_ricci.h"
-#include "physics/bounce_solver.h"
-#include "thermo/szilard_engine.h"
-#include "thermo/generative_model.h"
-#include "thermo/markov_blanket.h"
+#include "../core/simplicial_complex.h"
+#include "../core/dynamic_coherence.h"
+#include "../core/regge_tensor.h"
+#include "../core/usf_constants.h"
+#include "../physics/pec_solver.h"
+#include "../physics/forman_ricci.h"
+#include "../physics/bounce_solver.h"
+#include "../thermo/szilard_engine.h"
+#include "../thermo/generative_model.h"
+#include "../thermo/markov_blanket.h"
 
 class DQFRController : public Node {
     GDCLASS(DQFRController, Node);
@@ -45,7 +46,7 @@ public:
     Ref<MarkovBlanket> blanket;
     Ref<SzilardEngine> metabolism;
     Ref<FormanRicci> forman_ricci;
-    Ref<LeeWickRegulator> lee_wick;
+    Ref<class LeeWickRegulator> lee_wick;
 
     PECSolver *pec_solver = nullptr;
     BounceSolver *bounce_solver = nullptr;
@@ -67,7 +68,7 @@ public:
     void transition_to_drift();
     void transition_to_sample();
 
-    void _process(double delta) override;
+    void _process(double delta);
 
     Phase get_phase() const { return current_phase; }
     double get_phase_fraction() const;
@@ -79,3 +80,4 @@ public:
 };
 
 #endif // DQFR_CONTROLLER_H
+

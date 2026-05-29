@@ -1,4 +1,5 @@
-#include "thermo/generative_model.h"
+#include "core/math/math_defs.h"
+#include "generative_model.h"
 #include "core/math/math_funcs.h"
 #include <cmath>
 
@@ -25,9 +26,9 @@ void GenerativeModel::initialize(int p_n_states, int p_n_observations) {
     likelihood.resize(n_states);
     double uniform_obs = 1.0 / (double)n_observations;
     for (int i = 0; i < n_states; i++) {
-        likelihood[i].resize(n_observations);
+        likelihood.write[i].resize(n_observations);
         for (int j = 0; j < n_observations; j++) {
-            likelihood[i].set(j, uniform_obs);
+            likelihood.write[i].set(j, uniform_obs);
         }
     }
 }
