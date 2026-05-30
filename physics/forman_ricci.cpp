@@ -65,8 +65,11 @@ double FormanRicci::compute_ricci_from_vertices(const SimplicialComplex &complex
     double len = complex.edge_length_raw(v0, v1);
     double w_e = edge_weight(len);
 
+    if (!std::isfinite(w_e) || w_e <= 0.0) {
+        return 0.0;
+    }
+
     double face_sum = 0.0;
-    int face_count = 0;
 
     for (int ti = 0; ti < complex.triangle_count(); ti++) {
         const Simplex &tri = complex.triangles[ti];
@@ -87,15 +90,15 @@ double FormanRicci::compute_ricci_from_vertices(const SimplicialComplex &complex
             double l0 = complex.edge_length_raw(v0, v_other);
             double l1 = complex.edge_length_raw(v1, v_other);
             double w_f = face_weight(len, l0, l1);
-            face_sum += w_f / w_e;
-            face_count++;
+            if (std::isfinite(w_f)) {
+                face_sum += w_f / w_e;
+            }
         }
     }
 
     double vertex_sum = 2.0 / w_e;
 
     double parallel_sum = 0.0;
-    int parallel_count = 0;
 
     for (int ei = 0; ei < complex.edge_count(); ei++) {
         const Simplex &other = complex.edges[ei];
@@ -106,12 +109,19 @@ double FormanRicci::compute_ricci_from_vertices(const SimplicialComplex &complex
         if (ov0 == v0 || ov0 == v1 || ov1 == v0 || ov1 == v1) {
             double other_len = complex.edge_length_raw(ov0, ov1);
             double w_other = edge_weight(other_len);
-            parallel_sum += std::abs(w_e - w_other) / w_e;
-            parallel_count++;
+            if (std::isfinite(w_other)) {
+                parallel_sum += std::abs(w_e - w_other) / w_e;
+            }
         }
     }
 
     double ricci = w_e * (face_sum + vertex_sum - parallel_sum);
+    if (!std::isfinite(ricci)) {
+        return 0.0;
+    }
+    if (std::abs(ricci) > 1e50) {
+        ricci = (ricci > 0.0) ? 1e50 : -1e50;
+    }
     return ricci;
 }
 

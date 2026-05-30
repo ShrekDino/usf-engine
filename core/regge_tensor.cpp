@@ -118,22 +118,29 @@ double ReggeTensor::dihedral_angle_4d(const SimplicialComplex &complex, int a, i
     Vec4d ac = complex.edge_vector(a, c);
     Vec4d ad = complex.edge_vector(a, d);
 
-    double ab_ac = SimplicialComplex::minkowski_dot(ab, ac);
-    double ab_ad = SimplicialComplex::minkowski_dot(ab, ad);
-    double ac_ad = SimplicialComplex::minkowski_dot(ac, ad);
     double ab_sq = SimplicialComplex::minkowski_dot(ab, ab);
-    double ac_sq = SimplicialComplex::minkowski_dot(ac, ac);
-    double ad_sq = SimplicialComplex::minkowski_dot(ad, ad);
-
-    double ab_perp_ac = ac_sq - ab_ac * ab_ac / (ab_sq);
-    double ab_perp_ad = ad_sq - ab_ad * ab_ad / (ab_sq);
-    double cross = ac_ad - ab_ac * ab_ad / (ab_sq);
-
-    if (ab_perp_ac <= 0.0 || ab_perp_ad <= 0.0) {
+    if (std::abs(ab_sq) < 1e-30) {
         return Math::PI / 3.0;
     }
 
-    double cos_theta = cross / (std::sqrt(ab_perp_ac) * std::sqrt(ab_perp_ad));
+    double ab_ac = SimplicialComplex::minkowski_dot(ab, ac);
+    double ab_ad = SimplicialComplex::minkowski_dot(ab, ad);
+    double ac_ad = SimplicialComplex::minkowski_dot(ac, ad);
+    double ac_sq = SimplicialComplex::minkowski_dot(ac, ac);
+    double ad_sq = SimplicialComplex::minkowski_dot(ad, ad);
+
+    double ab_perp_ac = ac_sq - ab_ac * ab_ac / ab_sq;
+    double ab_perp_ad = ad_sq - ab_ad * ab_ad / ab_sq;
+    double cross = ac_ad - ab_ac * ab_ad / ab_sq;
+
+    double norm_ac = std::sqrt(std::abs(ab_perp_ac));
+    double norm_ad = std::sqrt(std::abs(ab_perp_ad));
+
+    if (norm_ac < 1e-30 || norm_ad < 1e-30) {
+        return Math::PI / 3.0;
+    }
+
+    double cos_theta = cross / (norm_ac * norm_ad);
     if (cos_theta > 1.0) {
         cos_theta = 1.0;
     }
