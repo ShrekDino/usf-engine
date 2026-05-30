@@ -51,7 +51,7 @@ CSV_FILES = {
 
 # Binary format magic
 MAGIC = 0x55F5
-VERSION = 2
+VERSION = 1
 
 # ---------------------------------------------------------------------------
 # CSV Download
@@ -202,13 +202,8 @@ def convert_csv_to_binary(csv_paths, dataset, output_path):
 
     print(f"    {len(edges)} edges loaded ({skipped} skipped)")
 
-    # Phase 4: Compute Delaunay tetrahedralization
-    print("  Phase 4/4: Computing 3D Delaunay triangulation...")
-    tetrahedra = _compute_delaunay(vertices)
-    print(f"    {len(tetrahedra)} tetrahedra")
-
-    # Phase 5: Write binary
-    print("  Phase 5/5: Writing binary file...")
+    # Phase 4: Write binary
+    print("  Phase 4/4: Writing binary file...")
 
     # Build string tables
     cell_type_list = [""] * len(cell_types)
@@ -228,8 +223,8 @@ def convert_csv_to_binary(csv_paths, dataset, output_path):
         neuropil_list[idx] = name
 
     with open(output_path, "wb") as f:
-        # Header: magic(4) + version(4) + n_verts(4) + n_edges(4) + n_tets(4) = 20 bytes
-        f.write(struct.pack("<IIIII", MAGIC, VERSION, len(vertices), len(edges), len(tetrahedra)))
+        # Header
+        f.write(struct.pack("<IIII", MAGIC, VERSION, len(vertices), len(edges)))
 
         # Vertices
         for v in vertices:
@@ -248,10 +243,6 @@ def convert_csv_to_binary(csv_paths, dataset, output_path):
                                 pre, post, w,
                                 neuropils[np],
                                 nt_types[nt]))
-
-        # Tetrahedra
-        for t in tetrahedra:
-            f.write(struct.pack("<IIII", t[0], t[1], t[2], t[3]))
 
         # String tables
         def write_str_table(f, table):
@@ -306,8 +297,6 @@ def main():
     parser.add_argument("--somas", help="Path to somas CSV (skip download)")
     parser.add_argument("--generate-sample", action="store_true",
                         help="Generate a small sample (100 neurons) for testing")
-    parser.add_argument("--generate-tets", action="store_true",
-                        help="Include Delaunay tetrahedralization (requires scipy)")
     args = parser.parse_args()
 
     output_dir = Path(args.output)
@@ -395,12 +384,8 @@ def _generate_sample(output_path):
             random.choice(nt_types_list),
         ))
 
-    # Compute Delaunay tetrahedra
-    tets = _compute_delaunay(vertices)
-
     with open(output_path, "wb") as f:
-        # Header: magic + version + n_verts + n_edges + n_tets
-        f.write(struct.pack("<IIIII", MAGIC, VERSION, len(vertices), len(edges), len(tets)))
+        f.write(struct.pack("<IIII", MAGIC, VERSION, len(vertices), len(edges)))
         for v in vertices:
             rid, ct, sd, nt, fl, x, y, z = v
             f.write(struct.pack("<QfffHHHH", rid, x, y, z,
@@ -415,9 +400,6 @@ def _generate_sample(output_path):
                                 neuropils_list.index(np),
                                 nt_types_list.index(nt)))
 
-        for t in tets:
-            f.write(struct.pack("<IIII", t[0], t[1], t[2], t[3]))
-
         for table in [cell_types_list, sides_list, nt_types_list, flows_list, neuropils_list]:
             f.write(struct.pack("<I", len(table)))
             for s in table:
@@ -425,68 +407,8 @@ def _generate_sample(output_path):
                 f.write(struct.pack("<I", len(encoded)))
                 f.write(encoded)
 
-    print(f"[Connectome] Generated sample: {output_path} ({n_neurons} neurons, {len(edges)} edges, {len(tets)} tetrahedra)")
+    print(f"[Connectome] Generated sample: {output_path} ({n_neurons} neurons, {len(edges)} edges)")
 
-
-def _compute_delaunay(vertices):
-    """Compute 3D Delaunay tetrahedralization from vertex positions.
-    
-    Uses SciPy if available; otherwise falls back to a simple heuristic.
-    For production use with the full 139K-point connectome, install scipy.
-    """
-    try:
-        from scipy.spatial import Delaunay
-        points = [(v[5], v[6], v[7]) for v in vertices]
-        tri = Delaunay(points)
-        tets = [(int(s[0]), int(s[1]), int(s[2]), int(s[3])) for s in tri.simplices]
-        return tets
-    except ImportError:
-        pass
-
-    # Fallback: simple octree-based tetrahedralization for testing
-    print("  [WARN] scipy not available — using simple grid tetrahedralization")
-    print("  [WARN] For production, install scipy: pip install scipy")
-    tets = []
-    n = len(vertices)
-    if n < 4:
-        return tets
-
-    # Sort vertices by spatial proximity using a simple binning approach
-    # Then create tetrahedra from nearby quadruples
-    coords = [(i, v[5], v[6], v[7]) for i, v in enumerate(vertices)]
-    
-    # Simple spatial hashing for proximity
-    grid_size = 50000  # 50 micron bins
-    bins = {}
-    for i, x, y, z in coords:
-        bx, by, bz = int(x / grid_size), int(y / grid_size), int(z / grid_size)
-        key = (bx, by, bz)
-        if key not in bins:
-            bins[key] = []
-        bins[key].append(i)
-
-    # Create tetrahedra from nearby bins
-    for (bx, by, bz), verts in bins.items():
-        if len(verts) < 4:
-            # Merge with neighboring bins
-            neighbors = []
-            for dx in range(-1, 2):
-                for dy in range(-1, 2):
-                    for dz in range(-1, 2):
-                        key = (bx+dx, by+dy, bz+dz)
-                        if key in bins:
-                            neighbors.extend(bins[key])
-            verts = list(set(verts + neighbors))
-
-        if len(verts) >= 4:
-            # Create tetrahedra from unique combinations (limit to avoid explosion)
-            max_tets = min(len(verts) * 3, 500)
-            for ti in range(min(len(verts) // 4, max_tets)):
-                base = ti * 4
-                if base + 3 < len(verts):
-                    tets.append((verts[base], verts[base+1], verts[base+2], verts[base+3]))
-
-    return tets[:max(1, len(vertices) * 3)]  # Cap at ~3× vertices
 
 if __name__ == "__main__":
     main()

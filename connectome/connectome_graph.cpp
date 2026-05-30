@@ -9,12 +9,32 @@
 
 ConnectomeGraph::ConnectomeGraph() {}
 
+uint32_t ConnectomeGraph::get_tet_vertex(int tet_idx, int vertex_slot) const {
+    if (tet_idx < 0 || tet_idx >= tetrahedra.size() || vertex_slot < 0 || vertex_slot >= 4) return 0;
+    switch (vertex_slot) {
+        case 0: return tetrahedra[tet_idx].v0;
+        case 1: return tetrahedra[tet_idx].v1;
+        case 2: return tetrahedra[tet_idx].v2;
+        case 3: return tetrahedra[tet_idx].v3;
+        default: return 0;
+    }
+}
+
+bool ConnectomeGraph::load_with_tets(const String &path) {
+    bool ok = load_binary(path);
+    if (ok && tetrahedra.size() == 0) {
+        print_line("[Connectome] WARNING: No tetrahedra in binary (version 1 format). Regenerate with import_flywire.py --generate-tets");
+    }
+    return ok;
+}
+
 void ConnectomeGraph::clear() {
     vertices.clear();
     vertex_ids.clear();
     edges.clear();
     outgoing_edges.clear();
     incoming_edges.clear();
+    tetrahedra.clear();
     cell_type_table.clear();
     side_table.clear();
     nt_type_table.clear();
@@ -355,9 +375,10 @@ bool ConnectomeGraph::save_binary(const String &path) const {
     }
 
     file->store_32(0x55F5);
-    file->store_32(1);
+    file->store_32(2); // version 2 adds tetrahedra
     file->store_32(vertices.size());
     file->store_32(edges.size());
+    file->store_32(tetrahedra.size());
 
     for (int i = 0; i < vertices.size(); i++) {
         file->store_64(vertices[i].root_id);
@@ -376,6 +397,13 @@ bool ConnectomeGraph::save_binary(const String &path) const {
         file->store_float(edges[i].synapse_count);
         file->store_16(edges[i].neuropil_idx);
         file->store_16(edges[i].nt_type_idx);
+    }
+
+    for (int i = 0; i < tetrahedra.size(); i++) {
+        file->store_32(tetrahedra[i].v0);
+        file->store_32(tetrahedra[i].v1);
+        file->store_32(tetrahedra[i].v2);
+        file->store_32(tetrahedra[i].v3);
     }
 
     auto write_str_table = [&](const Vector<String> &table) {
@@ -414,6 +442,7 @@ bool ConnectomeGraph::load_binary(const String &path) {
     uint32_t version = file->get_32();
     uint32_t num_verts = file->get_32();
     uint32_t num_edges = file->get_32();
+    uint32_t num_tets = (version >= 2) ? file->get_32() : 0;
 
     vertices.resize(num_verts);
     edges.resize(num_edges);
@@ -436,6 +465,14 @@ bool ConnectomeGraph::load_binary(const String &path) {
         edges.write[i].synapse_count = file->get_float();
         edges.write[i].neuropil_idx = file->get_16();
         edges.write[i].nt_type_idx = file->get_16();
+    }
+
+    tetrahedra.resize(num_tets);
+    for (uint32_t i = 0; i < num_tets; i++) {
+        tetrahedra.write[i].v0 = file->get_32();
+        tetrahedra.write[i].v1 = file->get_32();
+        tetrahedra.write[i].v2 = file->get_32();
+        tetrahedra.write[i].v3 = file->get_32();
     }
 
     auto read_str_table = [&](Vector<String> &table) {
@@ -484,11 +521,14 @@ bool ConnectomeGraph::load_binary(const String &path) {
 void ConnectomeGraph::_bind_methods() {
     ClassDB::bind_method(D_METHOD("load_csv", "vertices_path", "edges_path", "somas_path"), &ConnectomeGraph::load_csv);
     ClassDB::bind_method(D_METHOD("load_binary", "path"), &ConnectomeGraph::load_binary);
+    ClassDB::bind_method(D_METHOD("load_with_tets", "path"), &ConnectomeGraph::load_with_tets);
     ClassDB::bind_method(D_METHOD("save_binary", "path"), &ConnectomeGraph::save_binary);
     ClassDB::bind_method(D_METHOD("clear"), &ConnectomeGraph::clear);
 
     ClassDB::bind_method(D_METHOD("get_vertex_count"), &ConnectomeGraph::get_vertex_count);
     ClassDB::bind_method(D_METHOD("get_edge_count"), &ConnectomeGraph::get_edge_count);
+    ClassDB::bind_method(D_METHOD("get_tetrahedron_count"), &ConnectomeGraph::get_tetrahedron_count);
+    ClassDB::bind_method(D_METHOD("get_tet_vertex", "tet_idx", "vertex_slot"), &ConnectomeGraph::get_tet_vertex);
 
     ClassDB::bind_method(D_METHOD("find_vertex_by_root_id", "root_id"), &ConnectomeGraph::find_vertex_by_root_id);
     ClassDB::bind_method(D_METHOD("get_vertex_root_id", "idx"), &ConnectomeGraph::get_vertex_root_id);

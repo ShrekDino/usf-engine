@@ -43,11 +43,6 @@ protected:
     static void _bind_methods();
 
 public:
-    enum Phase {
-        PHASE_DRIFT = 0,
-        PHASE_SAMPLE = 1
-    };
-
     DistributedBlanket();
 
     Ref<ConnectomeGraph> graph;
@@ -66,8 +61,8 @@ public:
     double global_efficiency = 0.0;
     int active_neurons = 0;
 
-    // DQFR phase control
-    Phase current_phase = PHASE_DRIFT;
+    // DQFR phase control: 0=DRIFT, 1=SAMPLE
+    int current_phase = 0;
     double sample_timer = 0.0;
 
     void set_graph(Ref<ConnectomeGraph> p_graph);
@@ -80,8 +75,8 @@ public:
     void reset();
 
     // Phase control
-    void set_phase(Phase p);
-    Phase get_phase() const { return current_phase; }
+    void set_phase(int p);
+    int get_phase() const { return current_phase; }
 
     // Per-neuron access
     double get_membrane_potential(int idx) const;

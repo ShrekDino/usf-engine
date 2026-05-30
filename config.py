@@ -23,6 +23,10 @@ def get_doc_classes():
         "MarkovBlanket",
         "DQFRController",
         "USFWorld",
+        "ConnectomeGraph",
+        "DistributedBlanket",
+        "GlobalWorkspace",
+        "VitalityMonitor",
     ]
 
 def get_doc_path():

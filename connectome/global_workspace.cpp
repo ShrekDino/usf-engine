@@ -183,7 +183,7 @@ double GlobalWorkspace::compute_synchrony() {
     double sum_cos = 0.0, sum_sin = 0.0;
     for (int i = 0; i < n && i < 1000; i++) {  // Sample up to 1000 for performance
         double rate = blanket->get_firing_rate(i);
-        double phase = (rate / 200.0) * 2.0 * Math_PI;
+        double phase = (rate / 200.0) * 2.0 * Math::PI;
         sum_cos += std::cos(phase);
         sum_sin += std::sin(phase);
     }

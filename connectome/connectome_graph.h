@@ -96,7 +96,7 @@ public:
     int get_max_incoming() const;
     double get_mean_outgoing() const;
 
-    int get_tet_vertex(int tet_idx, int vertex_slot) const;
+    uint32_t get_tet_vertex(int tet_idx, int vertex_slot) const;
     bool load_with_tets(const String &path);
 
     void clear();

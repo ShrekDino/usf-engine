@@ -131,7 +131,6 @@ void FormanRicci::damp_metric(Ref<SimplicialComplex> complex, double dt) {
     for (int ei = 0; ei < complex->edge_count(); ei++) {
         double ricci = compute_ricci_for_edge(*complex.ptr(), ei);
         double current_len = complex->edge_lengths[ei];
-        double abs_len = std::abs(current_len);
 
         double delta = -damping_coefficient * ricci * current_len * dt;
 
