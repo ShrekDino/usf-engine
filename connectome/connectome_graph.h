@@ -24,6 +24,10 @@ struct ConnectomeEdge {
     uint16_t nt_type_idx = 0;
 };
 
+struct ConnectomeTet {
+    uint32_t v0 = 0, v1 = 0, v2 = 0, v3 = 0;
+};
+
 class ConnectomeGraph : public Resource {
     GDCLASS(ConnectomeGraph, Resource);
 
@@ -39,6 +43,9 @@ public:
 
     // Edge data
     Vector<ConnectomeEdge> edges;
+
+    // Tetrahedra (from 3D Delaunay triangulation)
+    Vector<ConnectomeTet> tetrahedra;
 
     // Adjacency: for each vertex idx, list of edge indices (outgoing = pre→post)
     Vector<Vector<uint32_t>> outgoing_edges;
@@ -59,6 +66,7 @@ public:
     // Queries
     int get_vertex_count() const { return vertices.size(); }
     int get_edge_count() const { return edges.size(); }
+    int get_tetrahedron_count() const { return tetrahedra.size(); }
 
     int find_vertex_by_root_id(uint64_t root_id) const;
     uint64_t get_vertex_root_id(int idx) const;
@@ -87,6 +95,9 @@ public:
     int get_max_outgoing() const;
     int get_max_incoming() const;
     double get_mean_outgoing() const;
+
+    int get_tet_vertex(int tet_idx, int vertex_slot) const;
+    bool load_with_tets(const String &path);
 
     void clear();
 
