@@ -15,6 +15,9 @@
 #include "../thermo/szilard_engine.h"
 #include "../thermo/generative_model.h"
 #include "../thermo/markov_blanket.h"
+#include "../connectome/distributed_blanket.h"
+#include "../connectome/global_workspace.h"
+#include "../connectome/vitality_monitor.h"
 
 class DQFRController : public Node {
     GDCLASS(DQFRController, Node);
@@ -37,7 +40,10 @@ public:
     double sample_timer = 0.0;
     double temporal_velocity = 1.0;
     double cycle_count = 0;
+    double total_objective_time = 0.0;
+    double total_subjective_time = 0.0;
 
+    // Core physics
     Ref<USFConstants> constants;
     Ref<SimplicialComplex> complex;
     Ref<ReggeTensor> regge;
@@ -50,6 +56,15 @@ public:
 
     PECSolver *pec_solver = nullptr;
     BounceSolver *bounce_solver = nullptr;
+
+    // Connectome stack (Week 3-6)
+    Ref<DistributedBlanket> distributed_blanket;
+    Ref<GlobalWorkspace> global_workspace;
+    Ref<VitalityMonitor> vitality_monitor;
+
+    // Adiabatic mollification tracking
+    double chi_prev = 0.0;
+    double adiabatic_penalty = 0.0;
 
     DQFRController();
     ~DQFRController();
@@ -75,6 +90,9 @@ public:
     double get_dqfr_ratio() const;
     double get_temporal_velocity() const { return temporal_velocity; }
     double get_cycle_count() const { return cycle_count; }
+    double get_total_objective_time() const { return total_objective_time; }
+    double get_total_subjective_time() const { return total_subjective_time; }
+    double get_adiabatic_penalty() const { return adiabatic_penalty; }
 
     Ref<GenerativeModel> get_inference_ref() const { return inference; }
     Ref<MarkovBlanket> get_blanket_ref() const { return blanket; }
@@ -85,4 +103,3 @@ public:
 };
 
 #endif // DQFR_CONTROLLER_H
-
