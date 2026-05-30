@@ -20,6 +20,7 @@
 #include "connectome_graph.h"
 #include "distributed_blanket.h"
 #include "global_workspace.h"
+#include "vitality_monitor.h"
 #include "usf_world.h"
 
 void initialize_usf_engine_module(ModuleInitializationLevel p_level) {
@@ -45,6 +46,7 @@ void initialize_usf_engine_module(ModuleInitializationLevel p_level) {
     GDREGISTER_CLASS(ConnectomeGraph);
     GDREGISTER_CLASS(DistributedBlanket);
     GDREGISTER_CLASS(GlobalWorkspace);
+    GDREGISTER_CLASS(VitalityMonitor);
     GDREGISTER_CLASS(USFWorld);
 }
 

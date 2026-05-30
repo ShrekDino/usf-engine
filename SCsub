@@ -30,4 +30,5 @@ env_usf.add_source_files(env.modules_sources, [
     "connectome/connectome_graph.cpp",
     "connectome/distributed_blanket.cpp",
     "connectome/global_workspace.cpp",
+    "connectome/vitality_monitor.cpp",
 ])
