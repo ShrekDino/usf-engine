@@ -38,10 +38,12 @@ CSV_FILES = {
     "neurons": {
         "product": "consolidated_cell_types",
         "columns": ["root_id", "cell_type", "side", "nt_type", "flow"],
+        "real_columns": ["root_id", "primary_type"],
     },
     "connections": {
         "product": "connections_princeton",
         "columns": ["pre_id", "post_id", "synapse_count", "neuropil", "nt_type"],
+        "real_columns": ["pre_root_id", "post_root_id", "neuropil", "syn_count", "nt_type"],
     },
     "somas": {
         "product": "soma_locations",
@@ -51,7 +53,7 @@ CSV_FILES = {
 
 # Binary format magic
 MAGIC = 0x55F5
-VERSION = 1
+VERSION = 2
 
 # ---------------------------------------------------------------------------
 # CSV Download
@@ -116,24 +118,77 @@ def download_all(output_dir, dataset="fafb"):
 # ---------------------------------------------------------------------------
 
 
+def _detect_csv_format(csv_path):
+    """Detect column mapping for Codex CSV files."""
+    with open(csv_path, "r") as f:
+        header = f.readline().strip()
+    cols = header.split(",")
+
+    # FAFB real format: root_id,primary_type
+    if "primary_type" in cols:
+        return {
+            "root_id": "root_id",
+            "cell_type": "primary_type",
+            "side": None,
+            "nt_type": None,
+            "flow": None,
+        }
+    # Connections real format: pre_root_id,post_root_id,neuropil,syn_count,nt_type
+    if "pre_root_id" in cols:
+        return {
+            "pre_id": "pre_root_id",
+            "post_id": "post_root_id",
+            "synapse_count": "syn_count",
+            "neuropil": "neuropil",
+            "nt_type": "nt_type",
+        }
+    return None
+
+def get_csv_row(row, mapping):
+    """Get value from CSV row with flexible key handling."""
+    for key, alias in mapping.items():
+        if key in row:
+            return row[key]
+        if alias and alias in row:
+            return row[alias]
+    return None
+
 def convert_csv_to_binary(csv_paths, dataset, output_path):
     """Convert downloaded CSVs to the connectome binary format."""
     print(f"\n[Connectome] Converting {dataset} to binary format...")
 
-    # Phase 1: Load somas
+    # Detect real vs test format
+    neuron_fmt = _detect_csv_format(csv_paths["neurons"])
+    conn_fmt = _detect_csv_format(csv_paths["connections"])
+    if neuron_fmt:
+        print(f"  Detected real FAFB neuron format: {list(neuron_fmt.values())}")
+    if conn_fmt:
+        print(f"  Detected real FAFB connection format: {list(conn_fmt.values())}")
+
+    # Phase 1: Load somas (if available, else use centroids)
     print("  Phase 1/4: Loading soma positions...")
     somas = {}
     soma_count = 0
-    with open(csv_paths["somas"], "r") as f:
-        reader = csv.DictReader(f)
-        for row in reader:
-            root_id = int(row["root_id"])
-            somas[root_id] = (
-                float(row.get("x", 0)),
-                float(row.get("y", 0)),
-                float(row.get("z", 0)),
-            )
-            soma_count += 1
+    soma_path = csv_paths.get("somas")
+    if soma_path and os.path.exists(soma_path):
+        try:
+            with open(soma_path, "r") as f:
+                reader = csv.DictReader(f)
+                for row in reader:
+                    if "root_id" in row:
+                        root_id = int(row["root_id"])
+                    elif "pt_root_id" in row:
+                        root_id = int(row["pt_root_id"])
+                    else:
+                        continue
+                    somas[root_id] = (
+                        float(row.get("x", 0) or 0),
+                        float(row.get("y", 0) or 0),
+                        float(row.get("z", 0) or 0),
+                    )
+                    soma_count += 1
+        except Exception as e:
+            print(f"    [WARN] Soma load failed: {e}")
     print(f"    {soma_count} somas loaded")
 
     # Phase 2: Load vertices
@@ -148,12 +203,19 @@ def convert_csv_to_binary(csv_paths, dataset, output_path):
         reader = csv.DictReader(f)
         for row in reader:
             root_id = int(row["root_id"])
-            cell_type = row.get("cell_type", "unknown")
-            side = row.get("side", "center")
-            nt_type = row.get("nt_type", "unknown")
-            flow = row.get("flow", "unknown")
-            x, y, z = somas.get(root_id, (0.0, 0.0, 0.0))
 
+            if neuron_fmt:
+                cell_type = row.get("primary_type", "unknown")
+                side = "center"
+                nt_type = "unknown"
+                flow = "unknown"
+            else:
+                cell_type = row.get("cell_type", "unknown")
+                side = row.get("side", "center")
+                nt_type = row.get("nt_type", "unknown")
+                flow = row.get("flow", "unknown")
+
+            x, y, z = somas.get(root_id, (0.0, 0.0, 0.0))
             vertices.append((root_id, cell_type, side, nt_type, flow, x, y, z))
 
             if cell_type not in cell_types:
@@ -180,8 +242,12 @@ def convert_csv_to_binary(csv_paths, dataset, output_path):
     with open(csv_paths["connections"], "r") as f:
         reader = csv.DictReader(f)
         for row in reader:
-            pre_id = int(row["pre_id"])
-            post_id = int(row["post_id"])
+            if conn_fmt:
+                pre_id = int(row["pre_root_id"])
+                post_id = int(row["post_root_id"])
+            else:
+                pre_id = int(row["pre_id"])
+                post_id = int(row["post_id"])
 
             if pre_id not in vertex_map or post_id not in vertex_map:
                 skipped += 1
@@ -189,9 +255,15 @@ def convert_csv_to_binary(csv_paths, dataset, output_path):
 
             pre_idx = vertex_map[pre_id]
             post_idx = vertex_map[post_id]
-            synapse_count = float(row.get("synapse_count", 1))
-            neuropil = row.get("neuropil", "unknown")
-            nt_type = row.get("nt_type", "unknown")
+
+            if conn_fmt:
+                synapse_count = float(row.get("syn_count", 1))
+                neuropil = row.get("neuropil", "unknown")
+                nt_type = row.get("nt_type", "unknown")
+            else:
+                synapse_count = float(row.get("synapse_count", 1))
+                neuropil = row.get("neuropil", "unknown")
+                nt_type = row.get("nt_type", "unknown")
 
             edges.append((pre_idx, post_idx, synapse_count, neuropil, nt_type))
 
