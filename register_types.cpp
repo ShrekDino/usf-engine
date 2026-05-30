@@ -17,8 +17,9 @@
 #include "thermo/generative_model.h"
 #include "thermo/markov_blanket.h"
 #include "dqfr/dqfr_controller.h"
-#include "connectome/connectome_graph.h"
-#include "connectome/distributed_blanket.h"
+#include "connectome_graph.h"
+#include "distributed_blanket.h"
+#include "global_workspace.h"
 #include "usf_world.h"
 
 void initialize_usf_engine_module(ModuleInitializationLevel p_level) {
@@ -43,6 +44,7 @@ void initialize_usf_engine_module(ModuleInitializationLevel p_level) {
     GDREGISTER_CLASS(DQFRController);
     GDREGISTER_CLASS(ConnectomeGraph);
     GDREGISTER_CLASS(DistributedBlanket);
+    GDREGISTER_CLASS(GlobalWorkspace);
     GDREGISTER_CLASS(USFWorld);
 }
 

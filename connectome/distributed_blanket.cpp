@@ -45,13 +45,13 @@ void DistributedBlanket::initialize() {
     mean_prediction_error = 0.0;
     global_efficiency = 0.0;
     active_neurons = n;
-    current_phase = PHASE_DRIFT;
+    current_phase = 0;
     sample_timer = 0.0;
 
     print_line("[Blanket] Initialized " + itos(n) + " neurons");
 }
 
-void DistributedBlanket::set_phase(Phase p) {
+void DistributedBlanket::set_phase(int p) {
     current_phase = p;
 }
 
@@ -161,7 +161,6 @@ void DistributedBlanket::aggregate_stats() {
     double total_pred_err = 0.0;
     total_negentropy = 0.0;
     total_waste_heat = 0.0;
-    total_vfe = 0.0;
     total_landauer_cost = 0.0;
     total_negentropy_harvested = 0.0;
     active_neurons = 0;
@@ -225,7 +224,7 @@ void DistributedBlanket::process_sample(double dt) {
 }
 
 void DistributedBlanket::process_step(double dt) {
-    if (current_phase == PHASE_DRIFT) {
+    if (current_phase == 0) {
         process_drift(dt);
     } else {
         process_sample(dt);
@@ -243,7 +242,7 @@ void DistributedBlanket::reset() {
     mean_prediction_error = 0.0;
     global_efficiency = 0.0;
     active_neurons = 0;
-    current_phase = PHASE_DRIFT;
+    current_phase = 0;
     sample_timer = 0.0;
 }
 
@@ -300,6 +299,4 @@ void DistributedBlanket::_bind_methods() {
     ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "total_landauer_cost", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_READ_ONLY), "", "get_total_landauer_cost");
     ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "total_negentropy_harvested", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_READ_ONLY), "", "get_total_negentropy_harvested");
 
-    BIND_ENUM_CONSTANT(PHASE_DRIFT);
-    BIND_ENUM_CONSTANT(PHASE_SAMPLE);
 }

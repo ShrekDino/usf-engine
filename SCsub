@@ -29,4 +29,5 @@ env_usf.add_source_files(env.modules_sources, [
     "dqfr/dqfr_controller.cpp",
     "connectome/connectome_graph.cpp",
     "connectome/distributed_blanket.cpp",
+    "connectome/global_workspace.cpp",
 ])
