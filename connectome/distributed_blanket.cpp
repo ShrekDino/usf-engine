@@ -1,0 +1,244 @@
+#include "distributed_blanket.h"
+#include "core/math/math_funcs.h"
+#include "core/string/print_string.h"
+#include <cmath>
+
+DistributedBlanket::DistributedBlanket() {}
+
+void DistributedBlanket::set_graph(Ref<ConnectomeGraph> p_graph) {
+    graph = p_graph;
+}
+
+void DistributedBlanket::initialize() {
+    if (graph.is_null() || graph->get_vertex_count() == 0) {
+        print_line("[Blanket] ERROR: No graph set");
+        return;
+    }
+
+    int n = graph->get_vertex_count();
+    states.resize(n);
+
+    // Initialize each neuron with basal state
+    for (int i = 0; i < n; i++) {
+        states.write[i].membrane_potential = -65.0;
+        states.write[i].firing_rate = 0.0;
+        states.write[i].energy_reserve = 1.0;
+        states.write[i].prediction_error = 0.0;
+        states.write[i].negentropy = 100.0;
+        states.write[i].waste_heat = 0.0;
+        states.write[i].temperature = 300.0;
+        states.write[i].efficiency = 0.99;
+        states.write[i].belief_entropy = Math::log((double)n);
+        states.write[i].sensory_sum = 0.0;
+        states.write[i].sensory_count = 0.0;
+        states.write[i].active_output = 0.0;
+    }
+
+    total_vfe = 0.0;
+    total_negentropy = (double)n * 100.0;
+    total_waste_heat = 0.0;
+    mean_firing_rate = 0.0;
+    mean_prediction_error = 0.0;
+    active_neurons = n;
+
+    print_line("[Blanket] Initialized " + itos(n) + " neuron states");
+}
+
+double DistributedBlanket::sigmoid(double x) const {
+    return 1.0 / (1.0 + std::exp(-x));
+}
+
+void DistributedBlanket::compute_sensory_input(int idx) {
+    if (graph.is_null()) return;
+    double sum = 0.0;
+    double count = 0.0;
+
+    // Sensory input = weighted sum of pre-synaptic partner firing rates
+    int n_in = graph->get_incoming_count(idx);
+    for (int i = 0; i < n_in; i++) {
+        int ei = graph->get_incoming_edge(idx, i);
+        int pre_idx = graph->get_edge_pre(ei);
+        if (pre_idx >= 0 && pre_idx < states.size()) {
+            double weight = (double)graph->get_edge_synapse_count(ei);
+            sum += states[pre_idx].active_output * weight;
+            count += weight;
+        }
+    }
+
+    states.write[idx].sensory_sum = sum;
+    states.write[idx].sensory_count = count > 0.0 ? count : 1.0;
+}
+
+void DistributedBlanket::compute_active_output(int idx) {
+    // Active output = sigmoid of membrane potential (firing probability)
+    double v = states[idx].membrane_potential;
+    double rate = sigmoid((v + 30.0) / 10.0) * 200.0; // 0-200 Hz range
+    states.write[idx].firing_rate = rate;
+    states.write[idx].active_output = rate / 200.0; // normalized 0-1
+}
+
+void DistributedBlanket::update_metabolism(int idx, double dt) {
+    NeuronState &s = states.write[idx];
+
+    // Landauer cost per spike processed
+    double spikes = s.firing_rate * dt;
+    double k_B = 1.380649e-23;
+    double cost = k_B * s.temperature * M_LN2 * spikes;
+    s.energy_reserve -= cost;
+
+    // Negentropy extraction from sensory input
+    if (s.sensory_count > 0.0) {
+        double info_gain = std::log(1.0 + s.sensory_sum / s.sensory_count);
+        s.negentropy -= cost + info_gain;
+        s.waste_heat += cost * (1.0 - s.efficiency);
+    }
+
+    // Replenish from negentropy reserve
+    if (s.energy_reserve < 0.1 && s.negentropy > 0.0) {
+        double replenish = Math::min(s.negentropy * 0.01, 0.1);
+        s.energy_reserve += replenish;
+        s.negentropy -= replenish;
+    }
+
+    // Clamp to prevent blowup
+    if (s.energy_reserve < 0.0) s.energy_reserve = 0.0;
+    if (s.negentropy < 0.0) s.negentropy = 0.0;
+    if (s.membrane_potential < -80.0) s.membrane_potential = -80.0;
+    if (s.membrane_potential > 50.0) s.membrane_potential = 50.0;
+}
+
+void DistributedBlanket::update_beliefs(int idx, double dt) {
+    NeuronState &s = states.write[idx];
+
+    // VFE = D_KL + prediction error
+    // D_KL approximates how far firing rate is from prior (basal = 0 Hz)
+    double prior_rate = 0.0;
+    double kl_div = 0.0;
+    if (s.firing_rate > 0.0 && prior_rate > 0.0) {
+        double q = s.firing_rate / 200.0;
+        double p = prior_rate / 200.0 + 0.01;
+        kl_div = q * std::log(q / p) + (1.0 - q) * std::log((1.0 - q) / (1.0 - p));
+    }
+
+    // Prediction error = difference between sensory input and expected
+    double expected_input = 0.0; // Prior expectation (can be learned)
+    double pred_err = s.sensory_sum - expected_input;
+
+    s.prediction_error = pred_err * pred_err;
+    s.belief_entropy = 0.0;
+    if (s.firing_rate > 0.0) {
+        double q = s.firing_rate / 200.0;
+        s.belief_entropy = -(q * std::log(q) + (1.0 - q) * std::log(1.0 - q + 1e-30));
+    }
+
+    // Gradient descent on membrane potential to minimize VFE
+    // ∂F/∂V ≈ prediction_error * sigmoid'(V)
+    double sig_prime = s.firing_rate * (1.0 - s.firing_rate / 200.0) / 200.0;
+    double grad_vfe = pred_err * sig_prime + 0.01 * (s.membrane_potential + 65.0);
+
+    s.membrane_potential -= 0.1 * grad_vfe * dt;
+    if (s.membrane_potential < -80.0) s.membrane_potential = -80.0;
+    if (s.membrane_potential > 50.0) s.membrane_potential = 50.0;
+
+    // Contribute to global VFE
+    total_vfe += kl_div + s.prediction_error;
+}
+
+void DistributedBlanket::process_step(double dt) {
+    if (graph.is_null() || states.size() == 0) return;
+
+    total_vfe = 0.0;
+    total_waste_heat = 0.0;
+    mean_firing_rate = 0.0;
+    mean_prediction_error = 0.0;
+    active_neurons = 0;
+
+    int n = states.size();
+
+    // Phase 1: Compute sensory input for all neurons
+    for (int i = 0; i < n; i++) {
+        compute_sensory_input(i);
+    }
+
+    // Phase 2: Update beliefs and membrane potential (VFE descent)
+    for (int i = 0; i < n; i++) {
+        update_beliefs(i, dt);
+    }
+
+    // Phase 3: Compute active output for all neurons
+    for (int i = 0; i < n; i++) {
+        compute_active_output(i);
+    }
+
+    // Phase 4: Update metabolism
+    for (int i = 0; i < n; i++) {
+        update_metabolism(i, dt);
+    }
+
+    // Phase 5: Aggregate statistics
+    double total_firing = 0.0;
+    double total_pred_err = 0.0;
+    active_neurons = 0;
+
+    for (int i = 0; i < n; i++) {
+        total_firing += states[i].firing_rate;
+        total_pred_err += states[i].prediction_error;
+        total_negentropy += states[i].negentropy;
+        total_waste_heat += states[i].waste_heat;
+        if (states[i].firing_rate > 0.5) active_neurons++;
+    }
+
+    mean_firing_rate = total_firing / (double)n;
+    mean_prediction_error = total_pred_err / (double)n;
+}
+
+void DistributedBlanket::reset() {
+    states.clear();
+    total_vfe = 0.0;
+    total_negentropy = 0.0;
+    total_waste_heat = 0.0;
+    mean_firing_rate = 0.0;
+    mean_prediction_error = 0.0;
+    active_neurons = 0;
+}
+
+double DistributedBlanket::get_membrane_potential(int idx) const {
+    return (idx >= 0 && idx < states.size()) ? states[idx].membrane_potential : 0.0;
+}
+
+double DistributedBlanket::get_firing_rate(int idx) const {
+    return (idx >= 0 && idx < states.size()) ? states[idx].firing_rate : 0.0;
+}
+
+double DistributedBlanket::get_negentropy(int idx) const {
+    return (idx >= 0 && idx < states.size()) ? states[idx].negentropy : 0.0;
+}
+
+double DistributedBlanket::get_prediction_error(int idx) const {
+    return (idx >= 0 && idx < states.size()) ? states[idx].prediction_error : 0.0;
+}
+
+void DistributedBlanket::_bind_methods() {
+    ClassDB::bind_method(D_METHOD("set_graph", "graph"), &DistributedBlanket::set_graph);
+    ClassDB::bind_method(D_METHOD("get_graph"), &DistributedBlanket::get_graph);
+    ADD_PROPERTY(PropertyInfo(Variant::OBJECT, "graph", PROPERTY_HINT_RESOURCE_TYPE, "ConnectomeGraph"), "set_graph", "get_graph");
+
+    ClassDB::bind_method(D_METHOD("initialize"), &DistributedBlanket::initialize);
+    ClassDB::bind_method(D_METHOD("process_step", "dt"), &DistributedBlanket::process_step);
+    ClassDB::bind_method(D_METHOD("reset"), &DistributedBlanket::reset);
+
+    ClassDB::bind_method(D_METHOD("get_membrane_potential", "idx"), &DistributedBlanket::get_membrane_potential);
+    ClassDB::bind_method(D_METHOD("get_firing_rate", "idx"), &DistributedBlanket::get_firing_rate);
+    ClassDB::bind_method(D_METHOD("get_negentropy", "idx"), &DistributedBlanket::get_negentropy);
+    ClassDB::bind_method(D_METHOD("get_prediction_error", "idx"), &DistributedBlanket::get_prediction_error);
+
+    ClassDB::bind_method(D_METHOD("get_total_vfe"), &DistributedBlanket::get_total_vfe);
+    ClassDB::bind_method(D_METHOD("get_total_negentropy"), &DistributedBlanket::get_total_negentropy);
+    ClassDB::bind_method(D_METHOD("get_mean_firing_rate"), &DistributedBlanket::get_mean_firing_rate);
+    ClassDB::bind_method(D_METHOD("get_active_neuron_count"), &DistributedBlanket::get_active_neuron_count);
+    ClassDB::bind_method(D_METHOD("get_neuron_count"), &DistributedBlanket::get_neuron_count);
+
+    ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "total_vfe", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_READ_ONLY), "", "get_total_vfe");
+    ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "mean_firing_rate", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_READ_ONLY), "", "get_mean_firing_rate");
+    ADD_PROPERTY(PropertyInfo(Variant::INT, "active_neuron_count", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_READ_ONLY), "", "get_active_neuron_count");
+}

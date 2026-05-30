@@ -5,7 +5,7 @@ Import("env")
 Import("env_modules")
 
 env_usf = env_modules.Clone()
-env_usf.Prepend(CPPPATH=[env_usf.Dir(".").path, env_usf.Dir("connectome").path])
+env_usf.Prepend(CPPPATH=[env_usf.Dir(".").path, env_usf.Dir(".").abspath + "/connectome"])
 
 env_usf.add_source_files(env.modules_sources, [
     "register_types.cpp",
@@ -28,4 +28,5 @@ env_usf.add_source_files(env.modules_sources, [
     "thermo/markov_blanket.cpp",
     "dqfr/dqfr_controller.cpp",
     "connectome/connectome_graph.cpp",
+    "connectome/distributed_blanket.cpp",
 ])
