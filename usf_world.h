@@ -59,6 +59,9 @@ public:
     double get_bounce_a_min() const { return bounce_a_min; }
     double get_metabolic_efficiency() const { return metabolic_efficiency; }
     bool get_bounce_detected() const { return bounce_detected; }
+    bool is_initialized() const { return initialized; }
+    Ref<SimplicialComplex> get_complex_ref() const { return complex; }
+    Ref<USFConstants> get_constants_ref() const { return constants; }
 
     void set_lattice_n(int n) { lattice_n = n > 1 ? n : 4; }
     int get_lattice_n() const { return lattice_n; }

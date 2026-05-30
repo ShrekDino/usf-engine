@@ -76,6 +76,11 @@ public:
     double get_temporal_velocity() const { return temporal_velocity; }
     double get_cycle_count() const { return cycle_count; }
 
+    Ref<GenerativeModel> get_inference_ref() const { return inference; }
+    Ref<MarkovBlanket> get_blanket_ref() const { return blanket; }
+    Ref<FormanRicci> get_forman_ricci_ref() const { return forman_ricci; }
+    Ref<SimplicialComplex> get_complex_ref() const { return complex; }
+
     void clear();
 };
 
