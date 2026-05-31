@@ -130,6 +130,36 @@ String ConnectomeGraph::get_neuropil(int edge_idx) const {
     return String();
 }
 
+String ConnectomeGraph::get_neuropil_by_idx(int np_idx) const {
+    if (np_idx >= 0 && np_idx < neuropil_table.size()) {
+        return neuropil_table[np_idx];
+    }
+    return String();
+}
+
+Vector<int> ConnectomeGraph::get_vertices_by_neuropil(const String &name) const {
+    int n = vertices.size();
+    Vector<bool> seen;
+    seen.resize(n);
+    for (int i = 0; i < n; i++) seen.write[i] = false;
+    int np_idx = -1;
+    for (int i = 0; i < neuropil_table.size(); i++) {
+        if (neuropil_table[i] == name) { np_idx = i; break; }
+    }
+    if (np_idx < 0) return Vector<int>();
+    for (int i = 0; i < edges.size(); i++) {
+        if (edges[i].neuropil_idx == (uint16_t)np_idx) {
+            seen.write[edges[i].pre_idx] = true;
+            seen.write[edges[i].post_idx] = true;
+        }
+    }
+    Vector<int> result;
+    for (int i = 0; i < n; i++) {
+        if (seen[i]) result.push_back(i);
+    }
+    return result;
+}
+
 String ConnectomeGraph::get_edge_nt_type(int edge_idx) const {
     if (edge_idx >= 0 && edge_idx < edges.size() && edges[edge_idx].nt_type_idx < nt_type_table.size()) {
         return nt_type_table[edges[edge_idx].nt_type_idx];
@@ -542,6 +572,9 @@ void ConnectomeGraph::_bind_methods() {
     ClassDB::bind_method(D_METHOD("get_edge_nt_type", "edge_idx"), &ConnectomeGraph::get_edge_nt_type);
     ClassDB::bind_method(D_METHOD("get_flow", "idx"), &ConnectomeGraph::get_flow);
     ClassDB::bind_method(D_METHOD("get_neuropil", "edge_idx"), &ConnectomeGraph::get_neuropil);
+    ClassDB::bind_method(D_METHOD("get_neuropil_by_idx", "np_idx"), &ConnectomeGraph::get_neuropil_by_idx);
+    ClassDB::bind_method(D_METHOD("get_neuropil_count"), &ConnectomeGraph::get_neuropil_count);
+    ClassDB::bind_method(D_METHOD("get_vertices_by_neuropil", "name"), &ConnectomeGraph::get_vertices_by_neuropil);
 
     ClassDB::bind_method(D_METHOD("get_edge_synapse_count", "edge_idx"), &ConnectomeGraph::get_edge_synapse_count);
     ClassDB::bind_method(D_METHOD("get_edge_pre", "edge_idx"), &ConnectomeGraph::get_edge_pre);

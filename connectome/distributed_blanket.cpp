@@ -262,6 +262,17 @@ double DistributedBlanket::get_prediction_error(int idx) const {
     return (idx >= 0 && idx < states.size()) ? states[idx].prediction_error : 0.0;
 }
 
+double DistributedBlanket::get_sensory_sum(int idx) const {
+    return (idx >= 0 && idx < states.size()) ? states[idx].sensory_sum : 0.0;
+}
+
+void DistributedBlanket::inject_sensory(int idx, double value) {
+    if (idx >= 0 && idx < states.size()) {
+        states.write[idx].sensory_sum += value;
+        states.write[idx].sensory_count += 1.0;
+    }
+}
+
 void DistributedBlanket::_bind_methods() {
     ClassDB::bind_method(D_METHOD("set_graph", "graph"), &DistributedBlanket::set_graph);
     ClassDB::bind_method(D_METHOD("get_graph"), &DistributedBlanket::get_graph);
@@ -281,6 +292,8 @@ void DistributedBlanket::_bind_methods() {
     ClassDB::bind_method(D_METHOD("get_firing_rate", "idx"), &DistributedBlanket::get_firing_rate);
     ClassDB::bind_method(D_METHOD("get_negentropy", "idx"), &DistributedBlanket::get_negentropy);
     ClassDB::bind_method(D_METHOD("get_prediction_error", "idx"), &DistributedBlanket::get_prediction_error);
+    ClassDB::bind_method(D_METHOD("get_sensory_sum", "idx"), &DistributedBlanket::get_sensory_sum);
+    ClassDB::bind_method(D_METHOD("inject_sensory", "idx", "value"), &DistributedBlanket::inject_sensory);
 
     ClassDB::bind_method(D_METHOD("get_total_vfe"), &DistributedBlanket::get_total_vfe);
     ClassDB::bind_method(D_METHOD("get_total_negentropy"), &DistributedBlanket::get_total_negentropy);

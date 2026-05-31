@@ -80,6 +80,9 @@ public:
     String get_nt_type(int idx) const;
     String get_flow(int idx) const;
     String get_neuropil(int edge_idx) const;
+    String get_neuropil_by_idx(int np_idx) const;
+    int get_neuropil_count() const { return neuropil_table.size(); }
+    Vector<int> get_vertices_by_neuropil(const String &name) const;
     String get_edge_nt_type(int edge_idx) const;
 
     float get_edge_synapse_count(int edge_idx) const;

@@ -83,6 +83,8 @@ public:
     double get_firing_rate(int idx) const;
     double get_negentropy(int idx) const;
     double get_prediction_error(int idx) const;
+    double get_sensory_sum(int idx) const;
+    void inject_sensory(int idx, double value);
 
     // Global queries
     double get_total_vfe() const { return total_vfe; }
