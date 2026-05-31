@@ -220,7 +220,7 @@ func _update_camera(delta: float) -> void:
     camera.look_at(orbit_target)
 
 
-func _input(event: InputEvent) -> void:
+func _unhandled_input(event: InputEvent) -> void:
     if event is InputEventMouseButton:
         if event.button_index == MOUSE_BUTTON_LEFT:
             dragging = event.pressed

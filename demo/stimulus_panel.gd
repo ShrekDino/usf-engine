@@ -23,6 +23,11 @@ signal stimulus_injected(neuropil_name: String, intensity: float)
 var last_injection_neuropil: String = ""
 var last_injection_intensity: float = 0.0
 
+var wake_mode: bool = false
+var wake_button: Button
+var saved_drift_duration: float = 0.0
+var saved_sample_duration: float = 0.0
+
 var panel_width: float = 220.0
 
 
@@ -100,6 +105,12 @@ func _build_ui() -> void:
     title.add_theme_font_size_override("font_size", 14)
     title.add_theme_color_override("font_color", Color(0.9, 0.9, 0.9))
     panel.add_child(title)
+
+    wake_button = Button.new()
+    wake_button.text = "🧠 Wake Up"
+    wake_button.size_flags_horizontal = Control.SIZE_FILL
+    wake_button.pressed.connect(_toggle_wake)
+    panel.add_child(wake_button)
 
     panel.add_child(HSeparator.new())
 
@@ -255,3 +266,28 @@ func _inject_stimulus(np_name: String) -> void:
     status_label.text = "Injected %.1f into %s (%d neurons)" % [intensity, np_name, count]
     stimulus_injected.emit(np_name, intensity)
     print("[Stimulus] %s <- %.1f (%d neurons)" % [np_name, intensity, count])
+
+
+func _toggle_wake() -> void:
+    var dqfr = _find_dqfr()
+    if not dqfr:
+        return
+
+    wake_mode = not wake_mode
+
+    if wake_mode:
+        saved_drift_duration = dqfr.drift_duration
+        saved_sample_duration = dqfr.sample_duration
+        dqfr.drift_duration = 0.01
+        dqfr.sample_duration = 0.5
+        wake_button.text = "💤 Stop"
+        wake_button.add_theme_color_override("font_color", Color(0.9, 0.3, 0.3))
+        status_label.text = "🧠 Brain awake — continuous processing"
+        print("[Wake] ON — drift=0.01s, sample=0.5s")
+    else:
+        dqfr.drift_duration = saved_drift_duration
+        dqfr.sample_duration = saved_sample_duration
+        wake_button.text = "🧠 Wake Up"
+        wake_button.add_theme_color_override("font_color", Color(0.9, 0.9, 0.9))
+        status_label.text = "💤 Brain asleep — normal DQFR cycle"
+        print("[Wake] OFF — restored drift=%.3f, sample=%.3f" % [saved_drift_duration, saved_sample_duration])

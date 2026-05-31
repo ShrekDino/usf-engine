@@ -96,7 +96,7 @@ var log_container: VBoxContainer
 var log_scroll: ScrollContainer
 var panel_visible: bool = true
 
-var panel_width: float = 280.0
+var panel_width: float = 320.0
 var indicator_size: float = 20.0
 
 
@@ -230,7 +230,7 @@ func _build_ui() -> void:
 	outer.add_child(log_header)
 
 	log_scroll = ScrollContainer.new()
-	log_scroll.custom_minimum_size = Vector2(0, 120)
+	log_scroll.custom_minimum_size = Vector2(0, 280)
 	log_scroll.size_flags_horizontal = Control.SIZE_FILL
 	log_scroll.size_flags_vertical = Control.SIZE_FILL
 	outer.add_child(log_scroll)
@@ -492,7 +492,7 @@ func _update_ui() -> void:
 
 	detail_panel.position = Vector2(max(size.x - panel_width - 10, 0), 4)
 	detail_panel.custom_minimum_size = Vector2(panel_width, size.y * 0.6)
-	detail_panel.size = Vector2(panel_width, min(size.y * 0.6, 500))
+	detail_panel.size = Vector2(panel_width, min(size.y * 0.8, 650))
 
 	if panel_visible and detail_panel.visible:
 		state_title.text = STATE_NAMES[current_state]
