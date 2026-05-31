@@ -1,4 +1,4 @@
-cff-version: 1.2.0
+cff-version: 1.1.0
 title: "USF Engine — Unified Simplicial Framework"
 message: "If you use this software in your research, please cite it."
 authors:
@@ -10,7 +10,7 @@ authors:
 date-released: 2026-05-31
 version: 1.1.0
 repository-code: https://github.com/ShrekDino/usf-engine
-license: "Dual License: Community (Non-Commercial) / Commercial"
+license: LicenseRef-Custom
 keywords:
   - unified simplicial framework
   - palatini-einstein-cartan
