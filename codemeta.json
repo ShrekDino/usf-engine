@@ -1,0 +1,42 @@
+{
+  "@context": "https://doi.org/10.5063/schema/codemeta/v2.0",
+  "@type": "SoftwareSourceCode",
+  "identifier": "usf-engine",
+  "name": "USF Engine — Unified Simplicial Framework",
+  "description": "Autopoietic simulation engine implementing Palatini–Einstein–Cartan (PEC) framework within a discrete simplicial complex, coupled with a FlyWire.ai connectome instantiated as per-neuron Markov blankets. Features 98% character recognition via injection-signature MLP, trigram sequence prediction, Active Inference feedback loop, and word-level language generation with temperature-controlled sampling. Built on Godot Engine 4.6.",
+  "version": "1.1.0",
+  "dateCreated": "2026-05-29",
+  "dateModified": "2026-05-31",
+  "license": "https://spdx.org/licenses/LicenseRef-scancode-other-copyleft",
+  "codeRepository": "https://github.com/ShrekDino/usf-engine",
+  "programmingLanguage": {
+    "@type": "ComputerLanguage",
+    "name": "C++",
+    "version": "17"
+  },
+  "runtimePlatform": "Godot Engine 4.6",
+  "author": [
+    {
+      "@type": "Person",
+      "@id": "https://orcid.org/0009-0008-1914-0528",
+      "givenName": "Sami Marie",
+      "familyName": "Torres",
+      "email": "st2825@proton.me",
+      "affiliation": "Independent Researcher"
+    }
+  ],
+  "keywords": [
+    "unified simplicial framework",
+    "palatini-einstein-cartan",
+    "DQFR",
+    "flywire connectome",
+    "active inference",
+    "free energy principle",
+    "godot engine",
+    "autopoietic simulation",
+    "neural network",
+    "language model",
+    "thermodynamic brain"
+  ],
+  "developmentStatus": "active"
+}
