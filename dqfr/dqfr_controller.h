@@ -99,6 +99,13 @@ public:
     Ref<FormanRicci> get_forman_ricci_ref() const { return forman_ricci; }
     Ref<SimplicialComplex> get_complex_ref() const { return complex; }
 
+    Ref<DistributedBlanket> get_distributed_blanket_ref() const { return distributed_blanket; }
+    void set_distributed_blanket_ref(Ref<DistributedBlanket> p_db) { distributed_blanket = p_db; }
+    Ref<GlobalWorkspace> get_global_workspace_ref() const { return global_workspace; }
+    void set_global_workspace_ref(Ref<GlobalWorkspace> p_gw) { global_workspace = p_gw; }
+    Ref<VitalityMonitor> get_vitality_monitor_ref() const { return vitality_monitor; }
+    void set_vitality_monitor_ref(Ref<VitalityMonitor> p_vm) { vitality_monitor = p_vm; }
+
     void clear();
 };
 

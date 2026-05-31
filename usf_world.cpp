@@ -150,7 +150,9 @@ void USFWorld::_bind_methods() {
     ClassDB::bind_method(D_METHOD("get_bounce_a_min"), &USFWorld::get_bounce_a_min);
     ClassDB::bind_method(D_METHOD("get_metabolic_efficiency"), &USFWorld::get_metabolic_efficiency);
     ClassDB::bind_method(D_METHOD("get_bounce_detected"), &USFWorld::get_bounce_detected);
+    ClassDB::bind_method(D_METHOD("is_initialized"), &USFWorld::is_initialized);
 
+    ADD_PROPERTY(PropertyInfo(Variant::BOOL, "initialized", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_READ_ONLY), "", "is_initialized");
     ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "variational_free_energy", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_READ_ONLY), "", "get_variational_free_energy");
     ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "dqfr_ratio", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_READ_ONLY), "", "get_dqfr_ratio");
     ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "omega_coherence", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_READ_ONLY), "", "get_omega_coherence");

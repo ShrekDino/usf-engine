@@ -207,6 +207,17 @@ void DQFRController::_bind_methods() {
     ClassDB::bind_method(D_METHOD("get_temporal_velocity"), &DQFRController::get_temporal_velocity);
     ClassDB::bind_method(D_METHOD("get_cycle_count"), &DQFRController::get_cycle_count);
 
+    ClassDB::bind_method(D_METHOD("get_distributed_blanket_ref"), &DQFRController::get_distributed_blanket_ref);
+    ClassDB::bind_method(D_METHOD("set_distributed_blanket_ref", "blanket"), &DQFRController::set_distributed_blanket_ref);
+    ClassDB::bind_method(D_METHOD("get_global_workspace_ref"), &DQFRController::get_global_workspace_ref);
+    ClassDB::bind_method(D_METHOD("set_global_workspace_ref", "workspace"), &DQFRController::set_global_workspace_ref);
+    ClassDB::bind_method(D_METHOD("get_vitality_monitor_ref"), &DQFRController::get_vitality_monitor_ref);
+    ClassDB::bind_method(D_METHOD("set_vitality_monitor_ref", "monitor"), &DQFRController::set_vitality_monitor_ref);
+
+    ADD_PROPERTY(PropertyInfo(Variant::OBJECT, "distributed_blanket", PROPERTY_HINT_RESOURCE_TYPE, "DistributedBlanket"), "set_distributed_blanket_ref", "get_distributed_blanket_ref");
+    ADD_PROPERTY(PropertyInfo(Variant::OBJECT, "global_workspace", PROPERTY_HINT_RESOURCE_TYPE, "GlobalWorkspace"), "set_global_workspace_ref", "get_global_workspace_ref");
+    ADD_PROPERTY(PropertyInfo(Variant::OBJECT, "vitality_monitor", PROPERTY_HINT_RESOURCE_TYPE, "VitalityMonitor"), "set_vitality_monitor_ref", "get_vitality_monitor_ref");
+
     ClassDB::bind_method(D_METHOD("clear"), &DQFRController::clear);
 
     ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "drift_duration", PROPERTY_HINT_RANGE, "0.001,100.0,0.001"), "set_drift_duration", "get_drift_duration");

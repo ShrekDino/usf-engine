@@ -88,7 +88,7 @@ func _ready() -> void:
 
 
 func _process(delta: float) -> void:
-    if not world.initialized:
+    if not world.is_initialized():
         return
 
     # ----- Collect Diagnostics -----
