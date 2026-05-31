@@ -40,6 +40,10 @@ public:
     int get_n_observations() const { return n_observations; }
     double get_belief(int i) const;
     void set_belief(int i, double val);
+    double get_likelihood(int state, int obs) const;
+    void set_likelihood(int state, int obs, double val);
+    double get_prior(int i) const;
+    void set_prior(int i, double val);
 };
 
 #endif // GENERATIVE_MODEL_H

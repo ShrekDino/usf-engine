@@ -146,6 +146,32 @@ void GenerativeModel::set_belief(int i, double val) {
     }
 }
 
+double GenerativeModel::get_likelihood(int state, int obs) const {
+    if (state >= 0 && state < likelihood.size() && obs >= 0 && obs < likelihood[state].size()) {
+        return likelihood[state][obs];
+    }
+    return 0.0;
+}
+
+void GenerativeModel::set_likelihood(int state, int obs, double val) {
+    if (state >= 0 && state < likelihood.size() && obs >= 0 && obs < likelihood[state].size()) {
+        likelihood.write[state].set(obs, val);
+    }
+}
+
+double GenerativeModel::get_prior(int i) const {
+    if (i >= 0 && i < prior.size()) {
+        return prior[i];
+    }
+    return 0.0;
+}
+
+void GenerativeModel::set_prior(int i, double val) {
+    if (i >= 0 && i < prior.size()) {
+        prior.set(i, val);
+    }
+}
+
 void GenerativeModel::_bind_methods() {
     ClassDB::bind_method(D_METHOD("set_constants", "constants"), &GenerativeModel::set_constants);
     ClassDB::bind_method(D_METHOD("get_constants"), &GenerativeModel::get_constants);
@@ -163,4 +189,8 @@ void GenerativeModel::_bind_methods() {
     ClassDB::bind_method(D_METHOD("get_n_observations"), &GenerativeModel::get_n_observations);
     ClassDB::bind_method(D_METHOD("get_belief", "i"), &GenerativeModel::get_belief);
     ClassDB::bind_method(D_METHOD("set_belief", "i", "val"), &GenerativeModel::set_belief);
+    ClassDB::bind_method(D_METHOD("get_likelihood", "state", "obs"), &GenerativeModel::get_likelihood);
+    ClassDB::bind_method(D_METHOD("set_likelihood", "state", "obs", "val"), &GenerativeModel::set_likelihood);
+    ClassDB::bind_method(D_METHOD("get_prior", "i"), &GenerativeModel::get_prior);
+    ClassDB::bind_method(D_METHOD("set_prior", "i", "val"), &GenerativeModel::set_prior);
 }

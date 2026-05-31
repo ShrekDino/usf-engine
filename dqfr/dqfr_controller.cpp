@@ -218,6 +218,7 @@ void DQFRController::_bind_methods() {
     ADD_PROPERTY(PropertyInfo(Variant::OBJECT, "global_workspace", PROPERTY_HINT_RESOURCE_TYPE, "GlobalWorkspace"), "set_global_workspace_ref", "get_global_workspace_ref");
     ADD_PROPERTY(PropertyInfo(Variant::OBJECT, "vitality_monitor", PROPERTY_HINT_RESOURCE_TYPE, "VitalityMonitor"), "set_vitality_monitor_ref", "get_vitality_monitor_ref");
 
+    ClassDB::bind_method(D_METHOD("get_inference_ref"), &DQFRController::get_inference_ref);
     ClassDB::bind_method(D_METHOD("clear"), &DQFRController::clear);
 
     ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "drift_duration", PROPERTY_HINT_RANGE, "0.001,100.0,0.001"), "set_drift_duration", "get_drift_duration");
