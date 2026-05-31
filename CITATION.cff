@@ -1,0 +1,22 @@
+cff-version: 1.2.0
+title: "USF Engine — Unified Simplicial Framework"
+message: "If you use this software in your research, please cite it."
+authors:
+  - family-names: Torres
+    given-names: Sami Marie
+    email: st2825@proton.me
+    affiliation: "Independent Researcher"
+    orcid: https://orcid.org/0000-0000-0000-0000
+doi: 10.5281/zenodo.XXXXXXX
+date-released: 2026-05-30
+version: 1.0.0
+repository-code: https://github.com/ShrekDino/usf-engine
+license: "Dual License: Community (Non-Commercial) / Commercial"
+keywords:
+  - unified simplicial framework
+  - palatini-einstein-cartan
+  - DQFR
+  - flywire connectome
+  - active inference
+  - godot engine
+  - autopoietic simulation
