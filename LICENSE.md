@@ -33,7 +33,7 @@ All copies must retain this copyright notice and credit:
 | Mid Market | $500K – $5M | $10,000/year |
 | Enterprise | $5M+ | $50,000/year |
 
-**Contact:** sami@example.com with subject "USF Engine Commercial License"
+**Contact:** samit2825@synaptechbio.org or st2825@proton.me with subject "USF Engine Commercial License"
 
 ## Why Dual Licensing?
 
